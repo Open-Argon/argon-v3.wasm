@@ -1,7 +1,6 @@
 package main
 
 import (
-	"os"
 	"strings"
 )
 
@@ -45,43 +44,45 @@ func parseGenericImport(code UNPARSEcode, index int, codeline []UNPARSEcode) (Ar
 
 func runImport(importOBJ ArImport, stack stack, stacklevel int) (any, ArErr) {
 	return nil, ArErr{"Import Error", "importing in WASM is currently not supported", importOBJ.line, importOBJ.path, importOBJ.code, true}
-	val, err := runVal(importOBJ.filePath, stack, stacklevel+1)
-	val = ArValidToAny(val)
-	if err.EXISTS {
-		return nil, err
-	}
-	if typeof(val) != "string" {
-		return nil, ArErr{"Type Error", "import requires a string, got type '" + typeof(val) + "'", importOBJ.line, importOBJ.path, importOBJ.code, true}
-	}
-	path := val.(string)
-	ex, e := os.Getwd()
-	if e != nil {
-		return nil, ArErr{"File Error", "could not get current working directory", importOBJ.line, importOBJ.path, importOBJ.code, true}
-	}
-	stackMap, err := importMod(path, ex, false, stack[0])
-	if err.EXISTS {
-		if err.line == 0 {
-			err.line = importOBJ.line
+	/*
+		val, err := runVal(importOBJ.filePath, stack, stacklevel+1)
+		val = ArValidToAny(val)
+		if err.EXISTS {
+			return nil, err
 		}
-		if err.path == "" {
-			err.path = importOBJ.path
+		if typeof(val) != "string" {
+			return nil, ArErr{"Type Error", "import requires a string, got type '" + typeof(val) + "'", importOBJ.line, importOBJ.path, importOBJ.code, true}
 		}
-		if err.code == "" {
-			err.code = importOBJ.code
+		path := val.(string)
+		ex, e := os.Getwd()
+		if e != nil {
+			return nil, ArErr{"File Error", "could not get current working directory", importOBJ.line, importOBJ.path, importOBJ.code, true}
 		}
-		return nil, err
-	}
-	switch x := importOBJ.values.(type) {
-	case []string:
-		for _, v := range x {
-			val, ok := stackMap.obj[v]
-			if !ok {
-				return nil, ArErr{"Import Error", "could not find value " + anyToArgon(v, true, false, 3, 0, false, 0) + " in module " + anyToArgon(path, true, false, 3, 0, false, 0), importOBJ.line, importOBJ.path, importOBJ.code, true}
+		stackMap, err := importMod(path, ex, false, stack[0])
+		if err.EXISTS {
+			if err.line == 0 {
+				err.line = importOBJ.line
 			}
-			stack[len(stack)-1].obj[v] = val
+			if err.path == "" {
+				err.path = importOBJ.path
+			}
+			if err.code == "" {
+				err.code = importOBJ.code
+			}
+			return nil, err
 		}
-	case string:
-		stack[len(stack)-1].obj[x] = stackMap
-	}
-	return nil, ArErr{}
+		switch x := importOBJ.values.(type) {
+		case []string:
+			for _, v := range x {
+				val, ok := stackMap.obj[v]
+				if !ok {
+					return nil, ArErr{"Import Error", "could not find value " + anyToArgon(v, true, false, 3, 0, false, 0) + " in module " + anyToArgon(path, true, false, 3, 0, false, 0), importOBJ.line, importOBJ.path, importOBJ.code, true}
+				}
+				stack[len(stack)-1].obj[v] = val
+			}
+		case string:
+			stack[len(stack)-1].obj[x] = stackMap
+		}
+		return nil, ArErr{}
+	*/
 }
