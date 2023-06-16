@@ -969,91 +969,35 @@ func calcPower(o operationType, stack stack, stacklevel int) (any, ArErr) {
 		}
 	}
 	output := newNumber().Set(resp.(number))
-	resp, err = runVal(
-		o.value2,
-		stack,
-		stacklevel+1,
-	)
-	resp = ArValidToAny(resp)
-	if err.EXISTS {
-		return nil, err
-	}
-	if typeof(resp) == "number" {
-		n := newNumber().Set(resp.(number))
-		if n.Cmp(newNumber().SetInt64(10)) <= 0 {
-			toOut := newNumber().SetInt64(1)
-			clone := newNumber().Set(output)
-			nAbs := (abs(newNumber().Set(n)))
-			j := newNumber()
-			for ; j.Cmp(nAbs) < 0; j.Add(j, one) {
-				toOut.Mul(toOut, clone)
-			}
-
-			nAbs.Sub(nAbs, j)
-			if nAbs.Cmp(newNumber()) < 0 {
-				j.Sub(j, one)
-				n1, _ := toOut.Float64()
-				n2, _ := nAbs.Float64()
-				calculated := newNumber().SetFloat64(math.Pow(n1, n2))
-				if calculated == nil {
-					calculated = infinity
-				}
-				toOut.Mul(toOut, calculated)
-			}
-			if n.Cmp(newNumber()) < 0 {
-				toOut.Quo(newNumber().SetInt64(1), toOut)
-			}
-			output.Set(toOut)
-		} else if n.Cmp(newNumber().SetInt64(1)) != 0 {
+	for i := 1; i < len(o.values); i++ {
+		resp, err := runVal(
+			o.values[i],
+			stack,
+			stacklevel+1,
+		)
+		resp = ArValidToAny(resp)
+		if err.EXISTS {
+			return nil, err
+		}
+		if typeof(resp) == "number" {
 			n1, _ := output.Float64()
-			n2, _ := n.Float64()
-			calculated := newNumber().SetFloat64(math.Pow(n1, n2))
-			if calculated == nil {
-				calculated = infinity
+			n2, _ := resp.(number).Float64()
+			output = newNumber().SetFloat64(math.Pow(n1, n2))
+			if output == nil {
+				output = infinity
 			}
-			output.Mul(output, calculated)
-		}
-		return output, ArErr{}
-	} else if x, ok := resp.(ArObject); ok {
-		if y, ok := x.obj["__Power__"]; ok {
-			val, err := runCall(
-				call{
-					y,
-					[]any{output},
-					o.code,
-					o.line,
-					o.path,
-				}, stack, stacklevel+1)
-			if !err.EXISTS {
-				return val, ArErr{}
+		} else {
+			return nil, ArErr{
+				"Runtime Error",
+				"Cannot calculate power of type '" + typeof(resp) + "'",
+				o.line,
+				o.path,
+				o.code,
+				true,
 			}
 		}
 	}
-
-	if x, ok := resp.(ArObject); ok {
-		if y, ok := x.obj["__PostPower__"]; ok {
-			val, err := runCall(
-				call{
-					y,
-					[]any{output},
-					o.code,
-					o.line,
-					o.path,
-				}, stack, stacklevel+1)
-			if err.EXISTS {
-				return nil, err
-			}
-			return val, ArErr{}
-		}
-	}
-	return nil, ArErr{
-		"Runtime Error",
-		"Cannot calculate power of type '" + typeof(resp) + "'",
-		o.line,
-		o.path,
-		o.code,
-		true,
-	}
+	return output, ArErr{}
 }
 
 func runOperation(o operationType, stack stack, stacklevel int) (any, ArErr) {
