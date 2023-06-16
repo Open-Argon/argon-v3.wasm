@@ -55,6 +55,13 @@ func mapGet(r ArMapGet, stack stack, stacklevel int) (any, ArErr) {
 		}
 	}
 
+	switch m := resp.(type) {
+	case ArObject:
+		if obj, ok := m.obj[r.args[0]]; ok {
+			return obj, ArErr{}
+		}
+	}
+
 	key, err := runVal(r.args[0], stack, stacklevel+1)
 	if err.EXISTS {
 		return nil, err
