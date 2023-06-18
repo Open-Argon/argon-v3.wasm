@@ -16,6 +16,7 @@ func newscope() ArObject {
 }
 
 func main() {
+	debugInit()
 	c := make(chan ArObject)
 	defer func() {
 		if r := recover(); r != nil {
