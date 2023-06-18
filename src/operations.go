@@ -846,59 +846,23 @@ func calcPower(o operationType, stack stack, stacklevel int) (number, ArErr) {
 			}
 			output.Mul(output, calculated)
 		}
-		if typeof(resp) == "number" {
-			n := newNumber().Set(resp.(number))
-			if n.Cmp(newNumber().SetInt64(10)) <= 0 {
-				toOut := newNumber().SetInt64(1)
-				clone := newNumber().Set(output)
-				nAbs := (abs(newNumber().Set(n)))
-				j := newNumber()
-				for ; j.Cmp(nAbs) < 0; j.Add(j, one) {
-					toOut.Mul(toOut, clone)
-				}
 
-				nAbs.Sub(nAbs, j)
-				if nAbs.Cmp(newNumber()) < 0 {
-					j.Sub(j, one)
-					n1, _ := toOut.Float64()
-					n2, _ := nAbs.Float64()
-					calculated := newNumber().SetFloat64(math.Pow(n1, n2))
-					if calculated == nil {
-						calculated = infinity
-					}
-					toOut.Mul(toOut, calculated)
-				}
-				if n.Cmp(newNumber()) < 0 {
-					toOut.Quo(newNumber().SetInt64(1), toOut)
-				}
-				output.Set(toOut)
-			} else if n.Cmp(newNumber().SetInt64(1)) != 0 {
-				n1, _ := output.Float64()
-				n2, _ := n.Float64()
-				calculated := newNumber().SetFloat64(math.Pow(n1, n2))
-				if calculated == nil {
-					calculated = infinity
-				}
-				output.Mul(output, calculated)
+		/*
+			n1, _ := output.Float64()
+			n2, _ := resp.(number).Float64()
+			output = newNumber().SetFloat64(math.Pow(n1, n2))
+			if output == nil {
+				output = infinity
 			}
-
-			/*
-				n1, _ := output.Float64()
-				n2, _ := resp.(number).Float64()
-				output = newNumber().SetFloat64(math.Pow(n1, n2))
-				if output == nil {
-					output = infinity
-				}
-			*/
-		} else {
-			return nil, ArErr{
-				"Runtime Error",
-				"Cannot calculate power of type '" + typeof(resp) + "'",
-				o.line,
-				o.path,
-				o.code,
-				true,
-			}
+		*/
+	} else {
+		return nil, ArErr{
+			"Runtime Error",
+			"Cannot calculate power of type '" + typeof(resp) + "'",
+			o.line,
+			o.path,
+			o.code,
+			true,
 		}
 	}
 	return output, ArErr{}
