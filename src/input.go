@@ -1,26 +1,23 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"os"
-	"syscall/js"
 
 	"golang.org/x/term"
 )
 
-func input(args ...any) string {
+func input(args ...interface{}) string {
 	output := []any{}
 	for i := 0; i < len(args); i++ {
 		output = append(output, anyToArgon(args[i], false, true, 3, 0, true, 0))
-		if i != len(args)-1 {
-			output = append(output, " ")
-		}
 	}
-	text := fmt.Sprint(output...)
-	fmt.Print(text)
-	inputData := js.Global().Get("getInput").Invoke(fmt.Sprint(output...)).String()
-	fmt.Println(inputData)
-	return (inputData)
+	fmt.Print(output...)
+	scanner := bufio.NewScanner(os.Stdin)
+	scanner.Scan()
+	input := scanner.Text()
+	return input
 }
 
 func getPassword(args ...any) (string, error) {

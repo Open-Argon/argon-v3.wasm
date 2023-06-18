@@ -17,7 +17,7 @@ func newscope() ArObject {
 
 func main() {
 	debugInit()
-	c := make(chan ArObject)
+	c := make(chan bool)
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Println("There was a fundamental error in argon v3 that caused it to crash.")

@@ -12,7 +12,6 @@ func makeGlobal(allowDocument bool) ArObject {
 	if allowDocument {
 		vars["document"] = ArDocument
 	}
-	vars["js"] = ArJS
 	vars["number"] = builtinFunc{"number", ArgonNumber}
 	vars["string"] = builtinFunc{"string", ArgonString}
 	vars["infinity"] = infinity
