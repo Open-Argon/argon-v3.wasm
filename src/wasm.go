@@ -35,10 +35,10 @@ func argonToJsValid(argon any) any {
 	}
 }
 
-func wasmRun(code string, allowDocument bool) (any, ArErr) {
+func wasmRun(code string) (any, ArErr) {
 	runID++
 	initRandom()
-	global := makeGlobal(allowDocument)
+	global := makeGlobal()
 	lines := strings.Split(code, "\n")
 	codelines := []UNPARSEcode{}
 	for i := 0; i < len(lines); i++ {

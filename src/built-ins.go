@@ -5,13 +5,10 @@ import (
 	"os"
 )
 
-func makeGlobal(allowDocument bool) ArObject {
+func makeGlobal() ArObject {
 	var vars = anymap{}
 	vars["global"] = vars
 	vars["term"] = ArTerm
-	if allowDocument {
-		vars["document"] = ArDocument
-	}
 	vars["number"] = builtinFunc{"number", ArgonNumber}
 	vars["string"] = builtinFunc{"string", ArgonString}
 	vars["infinity"] = infinity
