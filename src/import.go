@@ -10,6 +10,8 @@ import (
 var imported = make(map[string]ArObject)
 var importing = make(map[string]bool)
 
+var modules_folder = "argon_modules"
+
 func FileExists(filename string) bool {
 	if _, err := os.Stat(filename); err == nil {
 		return true
