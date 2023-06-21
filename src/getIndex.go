@@ -14,11 +14,12 @@ var mapGetCompile = makeRegex(`(.|\n)+\.([a-zA-Z_]|(\p{L}\p{M}*))([a-zA-Z0-9_]|(
 var indexGetCompile = makeRegex(`(.|\n)+\[(.|\n)+\]( *)`)
 
 type ArMapGet struct {
-	VAL  any
-	args []any
-	line int
-	code string
-	path string
+	VAL                any
+	args               []any
+	includeConstuctors bool
+	line               int
+	code               string
+	path               string
 }
 
 func mapGet(r ArMapGet, stack stack, stacklevel int) (any, ArErr) {
@@ -29,13 +30,11 @@ func mapGet(r ArMapGet, stack stack, stacklevel int) (any, ArErr) {
 
 	switch m := resp.(type) {
 	case ArObject:
-		if obj, ok := m.obj[r.args[0]]; ok {
-			return obj, ArErr{}
+		if r.includeConstuctors {
+			if obj, ok := m.obj[r.args[0]]; ok {
+				return obj, ArErr{}
+			}
 		}
-	}
-
-	switch m := resp.(type) {
-	case ArObject:
 		if callable, ok := m.obj["__getindex__"]; ok {
 			resp, err := runCall(call{
 				callable: callable,
@@ -46,11 +45,6 @@ func mapGet(r ArMapGet, stack stack, stacklevel int) (any, ArErr) {
 			}, stack, stacklevel+1)
 			if !err.EXISTS {
 				return resp, ArErr{}
-			}
-			if len(r.args) == 1 && !isUnhashable(r.args[0]) {
-				if _, ok := m.obj[r.args[0]]; ok {
-					return m.obj[r.args[0]], ArErr{}
-				}
 			}
 		}
 	}
@@ -82,7 +76,7 @@ func mapGetParse(code UNPARSEcode, index int, codelines []UNPARSEcode) (ArMapGet
 	if !worked {
 		return ArMapGet{}, false, err, i
 	}
-	return ArMapGet{resp, []any{key}, code.line, code.realcode, code.path}, true, ArErr{}, 1
+	return ArMapGet{resp, []any{key}, true, code.line, code.realcode, code.path}, true, ArErr{}, 1
 }
 
 func isIndexGet(code UNPARSEcode) bool {
@@ -120,7 +114,7 @@ func indexGetParse(code UNPARSEcode, index int, codelines []UNPARSEcode) (ArMapG
 			}
 			continue
 		}
-		return ArMapGet{tival, args, code.line, code.realcode, code.path}, true, ArErr{}, 1
+		return ArMapGet{tival, args, false, code.line, code.realcode, code.path}, true, ArErr{}, 1
 	}
 	return ArMapGet{}, false, ArErr{
 		"Syntax Error",

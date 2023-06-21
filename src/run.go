@@ -70,7 +70,10 @@ func runVal(line any, stack stack, stacklevel int) (any, ArErr) {
 		}
 		switch y := resp.(type) {
 		case number:
-			return newNumber().Neg(y), ArErr{}
+			if !x.sign {
+				return newNumber().Neg(y), ArErr{}
+			}
+			return y, ArErr{}
 		}
 		return nil, ArErr{
 			TYPE:    "TypeError",
@@ -181,6 +184,14 @@ func runVal(line any, stack stack, stacklevel int) (any, ArErr) {
 			break
 		}
 		return runSquareroot(x, stack, stacklevel+1)
+	case createMap:
+		if stackoverflow {
+			linenum = x.line
+			path = x.path
+			code = x.code
+			break
+		}
+		return runCreateMap(x, stack, stacklevel+1)
 	case ArImport:
 		if stackoverflow {
 			linenum = x.line
